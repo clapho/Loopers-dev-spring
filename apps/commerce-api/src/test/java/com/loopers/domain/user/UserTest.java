@@ -1,6 +1,7 @@
 package com.loopers.domain.user;
 
 
+import static com.loopers.domain.user.Gender.M;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -23,10 +24,11 @@ class UserTest {
     })
     void fail_whenIdFormatIsInvalid(String userId) {
         String name = "박수호";
+        Gender gender = M;
         String email = "abc@gmail.com";
         String birth = "1995-03-01";
 
-        assertThatThrownBy(() -> new User(userId, name, email, birth))
+        assertThatThrownBy(() -> new User(userId, name, gender, email, birth))
             .isInstanceOf(CoreException.class)
             .satisfies(exception -> {
                 CoreException coreException = (CoreException) exception;
@@ -40,10 +42,11 @@ class UserTest {
     void fail_whenEmailFormatIsInvalid() {
         String userId = "clap";
         String name = "박수호";
+        Gender gender = M;
         String invalidEmail = "abc.gmail@com";
         String birth = "1995-03-01";
 
-        assertThatThrownBy(() -> new User(userId, name, invalidEmail, birth))
+        assertThatThrownBy(() -> new User(userId, name, gender, invalidEmail, birth))
             .isInstanceOf(CoreException.class)
             .satisfies(exception -> {
                 CoreException coreException = (CoreException) exception;
@@ -57,10 +60,11 @@ class UserTest {
     void fail_whenBirthDateFormatIsInvalid() {
         String userId = "clap";
         String name = "박수호";
+        Gender gender = M;
         String email = "abc@gmail.com";
         String birth = "1995.03.01";
 
-        assertThatThrownBy(() -> new User(userId, name, email, birth))
+        assertThatThrownBy(() -> new User(userId, name, gender, email, birth))
             .isInstanceOf(CoreException.class)
             .satisfies(exception -> {
                 CoreException coreException = (CoreException) exception;
