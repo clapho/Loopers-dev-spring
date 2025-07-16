@@ -28,4 +28,9 @@ public class UserService {
         User user = new User(userId, name, gender, email, birth);
         return userRepository.save(user);
     }
+
+    @Transactional(readOnly = true)
+    public User findByUserId(String userId) {
+        return userRepository.findByUserId(userId);
+    }
 }

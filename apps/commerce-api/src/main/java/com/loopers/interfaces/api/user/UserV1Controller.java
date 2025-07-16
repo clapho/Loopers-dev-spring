@@ -1,11 +1,14 @@
 package com.loopers.interfaces.api.user;
 
-import com.loopers.domain.user.Gender;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserService;
 import com.loopers.interfaces.api.ApiResponse;
-import com.loopers.interfaces.api.user.UserV1Dto.GenderResponse;
+import com.loopers.interfaces.api.user.UserV1Dto.UserResponse;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorType;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,38 +30,32 @@ public class UserV1Controller implements UserV1ApiSpec{
         @Valid @RequestBody UserV1Dto.SignUpRequest signUpRequest
     ) {
 
-        Gender gender = convertGender(signUpRequest.gender());
-
         User user = userService.signUp(
             signUpRequest.userId(),
             signUpRequest.name(),
-            gender,
+            signUpRequest.gender().toDomainGender(),
             signUpRequest.email(),
             signUpRequest.birth()
         );
 
-        UserV1Dto.UserResponse response = new UserV1Dto.UserResponse(
-            user.getUserId(),
-            user.getName(),
-            convvertGenderResponse(user.getGender()),
-            user.getBirth(),
-            user.getEmail()
-        );
+        UserV1Dto.UserResponse response = UserV1Dto.UserResponse.from(user);
 
         return ApiResponse.success(response);
     }
 
-    private Gender convertGender(UserV1Dto.SignUpRequest.GenderRequest genderRequest) {
-        return switch (genderRequest) {
-            case M -> Gender.M;
-            case F -> Gender.F;
-        };
-    }
+    @Override
+    @GetMapping("/{userId}")
+    public ApiResponse<UserResponse> findUser(@PathVariable String userId) {
+        User user = userService.findByUserId(userId);
 
-    private UserV1Dto.GenderResponse convvertGenderResponse(Gender gender) {
-        return switch (gender) {
-            case M -> GenderResponse.M;
-            case F -> GenderResponse.F;
-        };
+        if (user == null) {
+            throw new CoreException(ErrorType.NOT_FOUND,
+                "[userId = " + userId + "] 사용자를 찾을 수 없습니다."
+            );
+        }
+
+        UserV1Dto.UserResponse response = UserV1Dto.UserResponse.from(user);
+
+        return ApiResponse.success(response);
     }
 }
