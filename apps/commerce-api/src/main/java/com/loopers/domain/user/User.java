@@ -2,19 +2,43 @@ package com.loopers.domain.user;
 
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Getter;
 
+@Entity
+@Table(name = "member")
+@Getter
 public class User {
 
-    private final String userId;
-    private final String name;
-    private final String email;
-    private final String birth;
+    @Id
+    private String userId;
+
+    private String name;
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    private String email;
+
+    private String birth;
 
     private static final String PATTERN_USER_ID = "^[a-zA-Z0-9]{1,10}$";
     private static final String PATTERN_EMAIL = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
     private static final String PATTERN_BIRTH = "^\\d{4}-\\d{2}-\\d{2}$";
 
-    public User(String userId, String name, String email, String birth) {
+    protected User() {}
+
+    public User(
+        String userId,
+        String name,
+        Gender gender,
+        String email,
+        String birth
+    ) {
         if (userId == null || !userId.matches(PATTERN_USER_ID)) {
             throw new CoreException(
                 ErrorType.BAD_REQUEST,
@@ -36,8 +60,13 @@ public class User {
             );
         }
 
+        if (gender == null) {
+            throw new CoreException(ErrorType.BAD_REQUEST, "성별은 필수 입력값입니다.");
+        }
+
         this.userId = userId;
         this.name = name;
+        this.gender = gender;
         this.email = email;
         this.birth = birth;
     }
