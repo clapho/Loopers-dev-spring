@@ -1,6 +1,7 @@
 package com.loopers.domain.point;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -8,6 +9,8 @@ import static org.mockito.Mockito.verify;
 import com.loopers.domain.user.Gender;
 import com.loopers.domain.user.UserRepository;
 import com.loopers.domain.user.UserService;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorType;
 import com.loopers.utils.DatabaseCleanUp;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -78,6 +81,32 @@ public class PointServiceIntegrationTest {
             verify(userRepository, times(1)).existsByUserId(userId);
             verify(pointRepository, never()).findByUserId(userId);
             assertThat(point).isNull();
+        }
+    }
+
+    @DisplayName("포인트 충전")
+    @Nested
+    class Charge {
+
+        @DisplayName("존재하지 않는 유저 ID 로 충전을 시도한 경우, 실패한다.")
+        @Test
+        void failToCharge_whenUserNotExists() {
+            //given
+            String nonExistentUserId = "notexist";
+            Long chargeAmount = 1000L;
+
+            //when & then
+            assertThatThrownBy(() -> pointService.chargePoint(nonExistentUserId, chargeAmount))
+                .isInstanceOf(CoreException.class)
+                .satisfies(exception -> {
+                    CoreException coreException = (CoreException) exception;
+                    assertThat(coreException.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
+                    assertThat(coreException.getMessage()).isEqualTo(
+                        "[userId = " + nonExistentUserId + "] 해당 유저가 존재하지 않습니다.");
+                });
+
+            verify(userRepository, times(1)).existsByUserId(nonExistentUserId);
+            verify(pointRepository, never()).findByUserId(nonExistentUserId);
         }
     }
 
