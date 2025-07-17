@@ -97,4 +97,72 @@ public class PointV1ApiE2ETest {
             );
         }
     }
+
+    @DisplayName("POST /api/v1/points")
+    @Nested
+    class Charge {
+
+        @DisplayName("존재하는 유저가 1000원을 충전할 경우, 충전된 보유 총량을 응답으로 반환한다.")
+        @Test
+        void returnsTotalAmount_whenChargeIsSuccessful() {
+            //given
+            String userId = "exist";
+            Long chargeAmount = 1000L;
+
+            userService.signUp(
+                userId,
+                "성공",
+                Gender.M,
+                "abcde@gmail.com",
+                "1995-03-02"
+            );
+
+            //when
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("X-USER-ID", userId);
+            PointV1Dto.ChargeRequest chargeRequest = new PointV1Dto.ChargeRequest(chargeAmount);
+            HttpEntity<PointV1Dto.ChargeRequest> requestEntity = new HttpEntity<>(chargeRequest, headers);
+
+            ParameterizedTypeReference<ApiResponse<PointV1Dto.PointResponse>> responseType =
+                new ParameterizedTypeReference<>() {};
+            ResponseEntity<ApiResponse<PointV1Dto.PointResponse>> response =
+                testRestTemplate.exchange(ENDPOINT, HttpMethod.POST, requestEntity, responseType);
+
+            //then
+            assertAll(
+                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
+                () -> assertThat(response.getBody()).isNotNull(),
+                () -> assertThat(response.getBody().meta().result()).isEqualTo(ApiResponse.Metadata.Result.SUCCESS),
+                () -> assertThat(response.getBody().data()).isNotNull(),
+                () -> assertThat(response.getBody().data().amount()).isEqualTo(1000L)
+            );
+        }
+
+        @DisplayName("존재하지 않는 유저로 요청할 경우, 404 Not Found 응답을 반환한다.")
+        @Test
+        void returns404_whenUserNotExists() {
+            //given
+            String nonExistentId = "notexist";
+            Long chargeAmount = 1000L;
+
+            //when
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("X-USER-ID", nonExistentId);
+            PointV1Dto.ChargeRequest chargeRequest = new PointV1Dto.ChargeRequest(chargeAmount);
+            HttpEntity<PointV1Dto.ChargeRequest> requestEntity = new HttpEntity<>(chargeRequest, headers);
+
+            ParameterizedTypeReference<ApiResponse<PointV1Dto.PointResponse>> responseType =
+                new ParameterizedTypeReference<>() {};
+            ResponseEntity<ApiResponse<PointV1Dto.PointResponse>> response =
+                testRestTemplate.exchange(ENDPOINT, HttpMethod.POST, requestEntity, responseType);
+
+            //then
+            assertAll(
+                () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND),
+                () -> assertThat(response.getBody()).isNotNull(),
+                () -> assertThat(response.getBody().meta().result()).isEqualTo(ApiResponse.Metadata.Result.FAIL),
+                () -> assertThat(response.getBody().data()).isNull()
+            );
+        }
+    }
 }

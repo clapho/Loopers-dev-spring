@@ -2,11 +2,14 @@ package com.loopers.interfaces.api.point;
 
 import com.loopers.domain.point.PointService;
 import com.loopers.interfaces.api.ApiResponse;
+import com.loopers.interfaces.api.point.PointV1Dto.ChargeRequest;
 import com.loopers.interfaces.api.point.PointV1Dto.PointResponse;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,4 +34,16 @@ public class PointV1Controller implements PointV1ApiSpec{
 
         return ApiResponse.success(new PointResponse(amount));
     }
+
+    @PostMapping
+    @Override
+    public ApiResponse<PointResponse> chargePoint(
+        @RequestHeader("X-USER-ID") String userId,
+        @RequestBody ChargeRequest chargeRequest
+    ) {
+        Long totalAmount = pointService.chargePoint(userId, chargeRequest.amount());
+        return ApiResponse.success(new PointResponse(totalAmount));
+    }
+
+
 }
