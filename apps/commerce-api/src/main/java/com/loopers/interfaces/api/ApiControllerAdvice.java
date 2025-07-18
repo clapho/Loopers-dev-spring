@@ -5,20 +5,21 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
@@ -39,10 +40,26 @@ public class ApiControllerAdvice {
     }
 
     @ExceptionHandler
+    public ResponseEntity<ApiResponse<?>> handleBadRequest(MissingRequestHeaderException e) {
+        String headerName = e.getHeaderName();
+        String message = String.format("필수 요청 헤더 '%s'가 누락되었습니다.", headerName);
+        return failureResponse(ErrorType.BAD_REQUEST, message);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<ApiResponse<?>> handleBadRequest(MissingServletRequestParameterException e) {
         String name = e.getParameterName();
         String type = e.getParameterType();
         String message = String.format("필수 요청 파라미터 '%s' (타입: %s)가 누락되었습니다.", name, type);
+        return failureResponse(ErrorType.BAD_REQUEST, message);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ApiResponse<?>> handleBadRequest(MethodArgumentNotValidException e) {
+        String fieldName = e.getBindingResult().getFieldErrors().getFirst().getField();
+        String rejectedValue = String.valueOf(e.getBindingResult().getFieldErrors().getFirst().getRejectedValue());
+        String defaultMessage = e.getBindingResult().getFieldErrors().getFirst().getDefaultMessage();
+        String message = String.format("필수 필드 '%s'의 값 '%s'이(가) 유효하지 않습니다: %s", fieldName, rejectedValue, defaultMessage);
         return failureResponse(ErrorType.BAD_REQUEST, message);
     }
 
