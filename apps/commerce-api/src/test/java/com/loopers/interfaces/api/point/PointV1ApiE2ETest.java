@@ -82,11 +82,17 @@ public class PointV1ApiE2ETest {
         @DisplayName("X-USER-ID 헤더가 없을 경우, 400 Bad Request 응답을 반환한다.")
         @Test
         void returnsBadRequest_whenUserIdHeaderMissing() {
+            //given
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+            headers.set("Accept", "application/json");
+            HttpEntity<?> requestEntity = new HttpEntity<>(headers);
+
             //when
             ParameterizedTypeReference<ApiResponse<PointV1Dto.PointResponse>> responseType =
                 new ParameterizedTypeReference<>() {};
             ResponseEntity<ApiResponse<PointV1Dto.PointResponse>> response =
-                testRestTemplate.exchange(ENDPOINT, HttpMethod.GET, null, responseType);
+                testRestTemplate.exchange(ENDPOINT, HttpMethod.GET, requestEntity, responseType);
 
             //then
             assertAll(
