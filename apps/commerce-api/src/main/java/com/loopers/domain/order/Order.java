@@ -1,0 +1,72 @@
+package com.loopers.domain.order;
+
+import com.loopers.domain.product.Money;
+import com.loopers.domain.product.Quantity;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorType;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Getter;
+
+@Entity
+@Table(name = "orders")
+@Getter
+public class Order {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Embedded
+    private Money totalPrice;
+
+    private String userId;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "order_id")
+    private List<OrderItem> items = new ArrayList<>();
+
+    private LocalDateTime orderedAt;
+
+    protected Order() {}
+
+    private Order(String userId) {
+        this.userId = userId;
+        this.totalPrice = Money.of(0L);
+        this.orderedAt = LocalDateTime.now();
+    }
+
+    public static Order create(String userId) {
+        if (userId == null || userId.trim().isEmpty()) {
+            throw new CoreException(
+                ErrorType.BAD_REQUEST,
+                "사용자 ID는 필수입니다."
+            );
+        }
+
+        return new Order(userId);
+    }
+
+    public void addOrderItem(Long productId, Money productPrice, Quantity quantity) {
+        OrderItem orderItem = OrderItem.create(productId, productPrice, quantity);
+        this.items.add(orderItem);
+        calculateTotalPrice();
+    }
+
+    private void calculateTotalPrice() {
+        long total = items.stream()
+            .mapToLong(item -> item.getTotalPrice().getValue().longValue())
+            .sum();
+        this.totalPrice = Money.of(total);
+    }
+}
