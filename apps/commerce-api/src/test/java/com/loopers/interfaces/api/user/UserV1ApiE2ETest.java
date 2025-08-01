@@ -147,7 +147,7 @@ public class UserV1ApiE2ETest {
                 () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND),
                 () -> assertThat(response.getBody()).isNotNull(),
                 () -> assertThat(response.getBody().meta().result()).isEqualTo(ApiResponse.Metadata.Result.FAIL),
-                () -> assertThat(response.getBody().meta().message()).contains("사용자를 찾을 수 없습니다."),
+                () -> assertThat(response.getBody().meta().message()).contains("사용자가 존재하지 않습니다."),
                 () -> assertThat(response.getBody().data()).isNull()
             );
         }
