@@ -7,6 +7,8 @@ import com.loopers.support.error.ErrorType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,6 +38,9 @@ public class Order {
     @JoinColumn(name = "order_id")
     private List<OrderItem> items = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
     private LocalDateTime orderedAt;
 
     protected Order() {}
@@ -43,6 +48,7 @@ public class Order {
     private Order(String userId) {
         this.userId = userId;
         this.totalPrice = Money.of(0L);
+        this.status = OrderStatus.PENDING;
         this.orderedAt = LocalDateTime.now();
     }
 
@@ -63,10 +69,15 @@ public class Order {
         calculateTotalPrice();
     }
 
+    public void complete() {
+        this.status = OrderStatus.COMPLETED;
+    }
+
     private void calculateTotalPrice() {
         long total = items.stream()
             .mapToLong(item -> item.getTotalPrice().getValue().longValue())
             .sum();
         this.totalPrice = Money.of(total);
     }
+
 }
