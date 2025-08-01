@@ -1,7 +1,9 @@
 package com.loopers.domain.product;
 
+import com.loopers.application.product.ProductSortOption;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,5 +34,17 @@ public class ProductService {
         }
 
         return product;
+    }
+
+    public List<Product> findProductsWithSortingAndPaging(
+        ProductSortOption sort,
+        int page,
+        int size
+    ) {
+        return productRepository.findAllWithSortingAndPaging(sort, page, size);
+    }
+
+    public long countProducts() {
+        return productRepository.countAll();
     }
 }
