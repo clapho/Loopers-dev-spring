@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.Getter;
 
 @Entity
@@ -29,6 +30,8 @@ public class Product {
 
     private Long brandId;
 
+    private LocalDateTime createdAt;
+
     protected Product() {}
 
     private Product(String name, Money price, Quantity stockQuantity, Long brandId) {
@@ -36,6 +39,7 @@ public class Product {
         this.price = price;
         this.stockQuantity = stockQuantity;
         this.brandId = brandId;
+        this.createdAt = LocalDateTime.now();
     }
 
     public static Product create(

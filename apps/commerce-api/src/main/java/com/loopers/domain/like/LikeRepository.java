@@ -12,7 +12,11 @@ public interface LikeRepository {
 
     List<Like> findByUserId(String userId);
 
+    List<Like> findLikesByUserIdWithPaging(String userId, int page, int size);
+
     long countByProductId(Long productId);
 
     boolean existsByUserIdAndProductId(String userId, Long productId);
+
+    long countByUserId(String userId);
 }

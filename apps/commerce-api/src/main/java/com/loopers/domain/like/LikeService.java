@@ -35,4 +35,12 @@ public class LikeService {
     public boolean isLikedByUser(String userId, Long productId) {
         return likeRepository.existsByUserIdAndProductId(userId, productId);
     }
+
+    public long countLikesByUser(String userId) {
+        return likeRepository.countByUserId(userId);
+    }
+
+    public List<Like> findLikesByUserIdWithPaging(String userId, int page, int size) {
+        return likeRepository.findLikesByUserIdWithPaging(userId, page, size);
+    }
 }
