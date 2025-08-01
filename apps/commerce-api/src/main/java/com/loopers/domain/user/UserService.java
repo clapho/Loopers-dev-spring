@@ -37,6 +37,14 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public User findByUserId(String userId) {
-        return userRepository.findByUserId(userId);
+        User user = userRepository.findByUserId(userId);
+        if (user == null) {
+            throw new CoreException(
+                ErrorType.NOT_FOUND,
+                "사용자가 존재하지 않습니다."
+            );
+        }
+
+        return user;
     }
 }
