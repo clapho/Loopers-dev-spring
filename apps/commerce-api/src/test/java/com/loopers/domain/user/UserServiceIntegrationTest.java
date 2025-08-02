@@ -123,17 +123,21 @@ public class UserServiceIntegrationTest {
         }
 
         @Test
-        @DisplayName("해당 ID의 회원이 존재하지 않을 경우, null 이 반환된다.")
-        void returnsNull_whenUserNotExists() {
+        @DisplayName("해당 ID의 회원이 존재하지 않을 경우, 예외가 반환된다.")
+        void fail_whenUserNotExists() {
             //given
             String nonExistentUserId = "notfound";
 
-            //when
-            User result = userService.findByUserId(nonExistentUserId);
+            //when & then
+            assertThatThrownBy(() -> userService.findByUserId(nonExistentUserId))
+                .isInstanceOf(CoreException.class)
+                .satisfies(exception -> {
+                    CoreException coreException = (CoreException) exception;
+                    assertThat(coreException.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
+                    assertThat(coreException.getMessage()).isEqualTo("사용자가 존재하지 않습니다.");
+                });
 
-            //then
             verify(userRepository, times(1)).findByUserId(nonExistentUserId);
-            assertThat(result).isNull();
         }
     }
 }
