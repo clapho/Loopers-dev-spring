@@ -17,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -55,6 +56,9 @@ public abstract class Coupon {
     private LocalDateTime expiredAt;
 
     private LocalDateTime usedAt;
+
+    @Version
+    private Long version;
 
     protected Coupon(
         String name,
