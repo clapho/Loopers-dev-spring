@@ -4,12 +4,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class DatabaseCleanUp implements InitializingBean {
@@ -23,6 +22,7 @@ public class DatabaseCleanUp implements InitializingBean {
     public void afterPropertiesSet() {
         entityManager.getMetamodel().getEntities().stream()
             .filter(entity -> entity.getJavaType().getAnnotation(Entity.class) != null)
+            .filter(entity -> entity.getJavaType().getAnnotation(Table.class) != null)
             .map(entity -> entity.getJavaType().getAnnotation(Table.class).name())
             .forEach(tableNames::add);
     }

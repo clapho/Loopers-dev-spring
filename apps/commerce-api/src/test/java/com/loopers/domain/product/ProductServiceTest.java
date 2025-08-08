@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -55,7 +56,7 @@ class ProductServiceTest {
             //given
             Long productId = 1L;
             Product product = Product.create("Cap", Money.of(10000L), Quantity.of(10), 1L);
-            when(productRepository.findById(productId)).thenReturn(product);
+            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
             //when
             Product result = productService.findById(productId);
@@ -70,7 +71,7 @@ class ProductServiceTest {
         void fail_whenProductNotExists() {
             //given
             Long nonExistentId = 999L;
-            when(productRepository.findById(nonExistentId)).thenReturn(null);
+            when(productRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
             //when & then
             assertThatThrownBy(() -> productService.findById(nonExistentId))

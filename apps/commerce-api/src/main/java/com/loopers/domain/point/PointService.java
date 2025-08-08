@@ -21,13 +21,11 @@ public class PointService {
             return null;
         }
 
-        Point point = pointRepository.findByUserId(userId);
-
-        if (point == null) {
-            throw new CoreException(ErrorType.NOT_FOUND,
+        Point point = pointRepository.findByUserId(userId)
+            .orElseThrow(() -> new CoreException(
+                ErrorType.NOT_FOUND,
                 "[userId = " + userId + "] 포인트 정보를 찾을 수 없습니다."
-            );
-        }
+            ));
 
         return point.getAmount();
     }
@@ -39,12 +37,11 @@ public class PointService {
                 "[userId = " + userId + "] 해당 유저가 존재하지 않습니다.");
         }
 
-        Point point = pointRepository.findByUserId(userId);
-
-        if (point == null) {
-            throw new CoreException(ErrorType.NOT_FOUND,
-                "[userId = " + userId + "] 포인트 정보를 찾을 수 없습니다.");
-        }
+        Point point = pointRepository.findByUserIdWithLock(userId)
+            .orElseThrow(() -> new CoreException(
+                ErrorType.NOT_FOUND,
+                "[userId = " + userId + "] 포인트 정보를 찾을 수 없습니다."
+            ));
 
         point.charge(chargeAmount);
         pointRepository.save(point);
@@ -59,12 +56,11 @@ public class PointService {
                 "[userId = " + userId + "] 해당 유저가 존재하지 않습니다.");
         }
 
-        Point point = pointRepository.findByUserId(userId);
-
-        if (point == null) {
-            throw new CoreException(ErrorType.NOT_FOUND,
-                "[userId = " + userId + "] 포인트 정보를 찾을 수 없습니다.");
-        }
+        Point point = pointRepository.findByUserIdWithLock(userId)
+            .orElseThrow(() -> new CoreException(
+                ErrorType.NOT_FOUND,
+                "[userId = " + userId + "] 포인트 정보를 찾을 수 없습니다."
+            ));
 
         point.use(useAmount);
         pointRepository.save(point);
