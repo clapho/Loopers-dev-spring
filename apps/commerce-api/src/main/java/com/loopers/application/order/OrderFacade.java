@@ -1,5 +1,7 @@
 package com.loopers.application.order;
 
+import com.loopers.domain.coupon.Coupon;
+import com.loopers.domain.coupon.CouponService;
 import com.loopers.domain.order.Order;
 import com.loopers.domain.order.OrderService;
 import com.loopers.domain.order.external.ExternalOrderService;
@@ -23,6 +25,7 @@ public class OrderFacade {
     private final UserService userService;
     private final PointService pointService;
     private final ExternalOrderService externalOrderService;
+    private final CouponService couponService;
 
     @Transactional
     public OrderInfo.Detail createOrder(OrderCommand.Create command) {
@@ -42,7 +45,12 @@ public class OrderFacade {
             );
         }
 
-        pointService.usePoint(command.userId(), order.getTotalPrice().getValue().longValue());
+        if (command.couponId() != null) {
+            Coupon coupon = couponService.getUserCoupon(command.couponId(), command.userId());
+            order.applyCoupon(coupon);
+        }
+
+        pointService.usePoint(command.userId(), order.getFinalPrice().getValue().longValue());
 
         Order savedOrder = orderService.save(order);
 
