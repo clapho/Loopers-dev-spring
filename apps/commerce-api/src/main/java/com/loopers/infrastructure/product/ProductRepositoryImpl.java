@@ -4,6 +4,7 @@ import com.loopers.application.product.ProductSortOption;
 import com.loopers.domain.product.Product;
 import com.loopers.domain.product.ProductRepository;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,8 +22,13 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public Product findById(Long id) {
-        return productJpaRepository.findById(id).orElse(null);
+    public Optional<Product> findById(Long id) {
+        return productJpaRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Product> findByIdWithLock(Long id) {
+        return productJpaRepository.findByIdWithLock(id);
     }
 
     @Override
