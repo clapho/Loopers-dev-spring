@@ -1,10 +1,13 @@
 package com.loopers.domain.order;
 
+import com.loopers.domain.coupon.Coupon;
 import com.loopers.domain.product.Money;
 import com.loopers.domain.product.Quantity;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -32,6 +35,10 @@ public class Order {
     @Embedded
     private Money totalPrice;
 
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "discount_amount"))
+    private Money discountAmount;
+
     private String userId;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -48,6 +55,7 @@ public class Order {
     private Order(String userId) {
         this.userId = userId;
         this.totalPrice = Money.of(0L);
+        this.discountAmount = Money.of(0L);
         this.status = OrderStatus.PENDING;
         this.orderedAt = LocalDateTime.now();
     }
@@ -69,6 +77,22 @@ public class Order {
         calculateTotalPrice();
     }
 
+    public void applyCoupon(Coupon coupon) {
+        if (coupon == null) {
+            return;
+        }
+
+        coupon.use(this.totalPrice);
+
+        Money discount = coupon.calculateDiscountAmount(this.totalPrice);
+
+        this.discountAmount = discount;
+    }
+
+    public Money getFinalPrice() {
+        return this.totalPrice.subtract(this.discountAmount);
+    }
+
     public void complete() {
         this.status = OrderStatus.COMPLETED;
     }
@@ -79,5 +103,4 @@ public class Order {
             .sum();
         this.totalPrice = Money.of(total);
     }
-
 }

@@ -33,7 +33,7 @@ public class CouponService {
         }
     }
 
-    private Coupon getUserCoupon(Long couponId, String userId) {
+    public Coupon getUserCoupon(Long couponId, String userId) {
         return couponRepository.findByIdAndUserId(couponId, userId)
             .orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND,
