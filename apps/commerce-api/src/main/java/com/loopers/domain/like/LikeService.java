@@ -12,7 +12,7 @@ public class LikeService {
     private final LikeRepository likeRepository;
 
     @Transactional
-    public Like create(String userId, Long productId) {
+    public Like like(String userId, Long productId) {
         Like existingLike = likeRepository.findByUserIdAndProductId(userId, productId);
         if (existingLike != null) {
             return existingLike;
@@ -23,27 +23,27 @@ public class LikeService {
     }
 
     @Transactional
-    public void delete(String userId, Long productId) {
+    public void unlike(String userId, Long productId) {
         likeRepository.deleteByUserIdAndProductId(userId, productId);
     }
 
-    public List<Like> findLikesByUser(String userId) {
+    public List<Like> getAllByUser(String userId) {
         return likeRepository.findByUserId(userId);
     }
 
-    public long countLikesByProduct(Long productId) {
-        return likeRepository.countByProductId(productId);
+    public List<Like> getAllByUserWithPaging(String userId, int page, int size) {
+        return likeRepository.findLikesByUserIdWithPaging(userId, page, size);
     }
 
-    public boolean isLikedByUser(String userId, Long productId) {
+    public boolean isLiked(String userId, Long productId) {
         return likeRepository.existsByUserIdAndProductId(userId, productId);
     }
 
-    public long countLikesByUser(String userId) {
-        return likeRepository.countByUserId(userId);
+    public long countByProduct(Long productId) {
+        return likeRepository.countByProductId(productId);
     }
 
-    public List<Like> findLikesByUserIdWithPaging(String userId, int page, int size) {
-        return likeRepository.findLikesByUserIdWithPaging(userId, page, size);
+    public long countByUser(String userId) {
+        return likeRepository.countByUserId(userId);
     }
 }

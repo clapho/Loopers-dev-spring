@@ -45,8 +45,8 @@ public class UserV1Controller implements UserV1ApiSpec{
 
     @Override
     @GetMapping("/{userId}")
-    public ApiResponse<UserResponse> findUser(@PathVariable String userId) {
-        User user = userService.findByUserId(userId);
+    public ApiResponse<UserResponse> get(@PathVariable String userId) {
+        User user = userService.get(userId);
 
         if (user == null) {
             throw new CoreException(ErrorType.NOT_FOUND,

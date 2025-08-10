@@ -80,7 +80,7 @@ class ProductConcurrencyTest {
         executorService.shutdown();
 
         // then
-        Product finalProduct = productService.findById(savedProduct.getId());
+        Product finalProduct = productService.get(savedProduct.getId());
         int expectedStock = 100 - (successCount.get() * decreaseAmountPerThread);
 
         assertAll(
@@ -132,7 +132,7 @@ class ProductConcurrencyTest {
         executorService.shutdown();
 
         // then
-        Product finalProduct = productService.findById(savedProduct.getId());
+        Product finalProduct = productService.get(savedProduct.getId());
 
         assertAll(
             () -> assertThat(successCount.get()).isEqualTo(6),

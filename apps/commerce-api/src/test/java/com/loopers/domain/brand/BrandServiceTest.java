@@ -102,7 +102,7 @@ class BrandServiceTest {
             when(brandRepository.findById(brandId)).thenReturn(brand);
 
             //when
-            Brand result = brandService.findById(brandId);
+            Brand result = brandService.get(brandId);
 
             //then
             assertThat(result).isEqualTo(brand);
@@ -117,7 +117,7 @@ class BrandServiceTest {
             when(brandRepository.findById(nonExistentId)).thenReturn(null);
 
             //when & then
-            assertThatThrownBy(() -> brandService.findById(nonExistentId))
+            assertThatThrownBy(() -> brandService.get(nonExistentId))
                 .isInstanceOf(CoreException.class)
                 .satisfies(exception -> {
                     CoreException coreException = (CoreException) exception;

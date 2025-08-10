@@ -95,7 +95,7 @@ public class ProductFacadeIntegrationTest {
                 "1995-03-01"
             );
 
-            likeService.create(userId, product.getId());
+            likeService.like(userId, product.getId());
 
             ProductCommand.GetDetail command = ProductCommand.GetDetail.of(product.getId());
 
@@ -285,8 +285,8 @@ public class ProductFacadeIntegrationTest {
                 "1995-03-01"
             );
 
-            likeService.create(userId, product1.getId());
-            likeService.create(userId, product2.getId());
+            likeService.like(userId, product1.getId());
+            likeService.like(userId, product2.getId());
 
             ProductCommand.GetLikedProducts command = ProductCommand.GetLikedProducts.of(userId, 0, 10);
 
@@ -362,7 +362,7 @@ public class ProductFacadeIntegrationTest {
                     Quantity.of(100),
                     brand1.getId()
                 );
-                likeService.create(userId, product.getId());
+                likeService.like(userId, product.getId());
             }
 
             ProductCommand.GetLikedProducts command = ProductCommand.GetLikedProducts.of(userId, 1, 2);

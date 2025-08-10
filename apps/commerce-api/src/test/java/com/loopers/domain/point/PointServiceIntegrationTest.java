@@ -61,7 +61,7 @@ public class PointServiceIntegrationTest {
             );
 
             //when
-            Long point = pointService.getPointAmount(userId);
+            Long point = pointService.getAmount(userId);
 
             //then
             verify(pointRepository, times(1)).findByUserId(userId);
@@ -75,7 +75,7 @@ public class PointServiceIntegrationTest {
             String userId = "notexist";
 
             //when
-            Long point = pointService.getPointAmount(userId);
+            Long point = pointService.getAmount(userId);
 
             //then
             verify(userRepository, times(1)).existsByUserId(userId);
@@ -96,7 +96,7 @@ public class PointServiceIntegrationTest {
             Long chargeAmount = 1000L;
 
             //when & then
-            assertThatThrownBy(() -> pointService.chargePoint(nonExistentUserId, chargeAmount))
+            assertThatThrownBy(() -> pointService.charge(nonExistentUserId, chargeAmount))
                 .isInstanceOf(CoreException.class)
                 .satisfies(exception -> {
                     CoreException coreException = (CoreException) exception;

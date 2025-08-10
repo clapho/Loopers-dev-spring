@@ -85,7 +85,7 @@ class LikeConcurrencyTest {
             final String userId = "user" + i;
             executorService.submit(() -> {
                 try {
-                    likeService.create(userId, savedProduct.getId());
+                    likeService.like(userId, savedProduct.getId());
                     successCount.incrementAndGet();
                 } catch (Exception e) {
                     System.out.println("좋아요 실패: " + e.getMessage());
@@ -99,7 +99,7 @@ class LikeConcurrencyTest {
         executorService.shutdown();
 
         // then
-        long likeCount = likeService.countLikesByProduct(savedProduct.getId());
+        long likeCount = likeService.countByProduct(savedProduct.getId());
 
         assertAll(
             () -> assertThat(likeCount).isEqualTo(userCount),
@@ -135,7 +135,7 @@ class LikeConcurrencyTest {
             userRepository.save(user);
 
             if (i > 10) {
-                likeService.create("user" + i, savedProduct.getId());
+                likeService.like("user" + i, savedProduct.getId());
             }
         }
 
@@ -150,9 +150,9 @@ class LikeConcurrencyTest {
             executorService.submit(() -> {
                 try {
                     if (isLikeOperation) {
-                        likeService.create(userId, savedProduct.getId());
+                        likeService.like(userId, savedProduct.getId());
                     } else {
-                        likeService.delete(userId, savedProduct.getId());
+                        likeService.unlike(userId, savedProduct.getId());
                     }
                 } catch (Exception e) {
                     System.out.println("좋아요/취소 실패: " + e.getMessage());
@@ -166,7 +166,7 @@ class LikeConcurrencyTest {
         executorService.shutdown();
 
         // then
-        long finalLikeCount = likeService.countLikesByProduct(savedProduct.getId());
+        long finalLikeCount = likeService.countByProduct(savedProduct.getId());
 
         assertThat(finalLikeCount).isEqualTo(10);
     }

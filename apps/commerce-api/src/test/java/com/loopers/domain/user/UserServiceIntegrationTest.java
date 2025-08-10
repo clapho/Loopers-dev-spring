@@ -108,7 +108,7 @@ public class UserServiceIntegrationTest {
             userService.signUp(userId, name, gender, email, birth);
 
             //when
-            User result = userService.findByUserId(userId);
+            User result = userService.get(userId);
 
             //then
             verify(userRepository, times(1)).findByUserId(userId);
@@ -129,7 +129,7 @@ public class UserServiceIntegrationTest {
             String nonExistentUserId = "notfound";
 
             //when & then
-            assertThatThrownBy(() -> userService.findByUserId(nonExistentUserId))
+            assertThatThrownBy(() -> userService.get(nonExistentUserId))
                 .isInstanceOf(CoreException.class)
                 .satisfies(exception -> {
                     CoreException coreException = (CoreException) exception;

@@ -69,7 +69,7 @@ class PointServiceConcurrencyTest {
         for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
-                    pointService.usePoint(userId, useAmountPerThread);
+                    pointService.use(userId, useAmountPerThread);
                     successCount.incrementAndGet();
                 } catch (CoreException e) {
                     failCount.incrementAndGet();
@@ -84,7 +84,7 @@ class PointServiceConcurrencyTest {
         executorService.shutdown();
 
         // then
-        Long finalAmount = pointService.getPointAmount(userId);
+        Long finalAmount = pointService.getAmount(userId);
         Long expectedAmount = 1000L - (successCount.get() * useAmountPerThread);
 
         assertAll(
@@ -124,7 +124,7 @@ class PointServiceConcurrencyTest {
         for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
-                    pointService.usePoint(userId, useAmountPerThread);
+                    pointService.use(userId, useAmountPerThread);
                     successCount.incrementAndGet();
                 } catch (CoreException e) {
                     failCount.incrementAndGet();
@@ -138,7 +138,7 @@ class PointServiceConcurrencyTest {
         executorService.shutdown();
 
         // then
-        Long finalAmount = pointService.getPointAmount(userId);
+        Long finalAmount = pointService.getAmount(userId);
 
         assertAll(
             () -> assertThat(successCount.get()).isEqualTo(6),

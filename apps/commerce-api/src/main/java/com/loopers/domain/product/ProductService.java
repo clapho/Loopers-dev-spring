@@ -26,7 +26,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Product findById(Long id) {
+    public Product get(Long id) {
         return productRepository.findById(id)
             .orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND,
@@ -35,7 +35,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<Product> findProductsWithSortingAndPaging(
+    public List<Product> getAllWithSortingAndPaging(
         ProductSortOption sort,
         int page,
         int size
@@ -53,7 +53,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public long countProducts() {
+    public long count() {
         return productRepository.countAll();
     }
 }

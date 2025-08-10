@@ -34,7 +34,7 @@ public class OrderFacade {
         Order order = Order.create(command.userId());
 
         for (OrderItemCommand.Create itemRequest : command.items()) {
-            Product product = productService.findById(itemRequest.productId());
+            Product product = productService.get(itemRequest.productId());
 
             product.decreaseStock(itemRequest.quantity());
 
@@ -46,13 +46,13 @@ public class OrderFacade {
         }
 
         if (command.couponId() != null) {
-            Coupon coupon = couponService.getUserCoupon(command.couponId(), command.userId());
+            Coupon coupon = couponService.get(command.couponId(), command.userId());
             order.applyCoupon(coupon);
         }
 
-        pointService.usePoint(command.userId(), order.getFinalPrice().getValue().longValue());
+        pointService.use(command.userId(), order.getFinalPrice().getValue().longValue());
 
-        Order savedOrder = orderService.save(order);
+        Order savedOrder = orderService.place(order);
 
         try {
             externalOrderService.sendOrderToExternalSystem(savedOrder);
@@ -61,7 +61,7 @@ public class OrderFacade {
         }
 
         savedOrder.complete();
-        Order completedOrder = orderService.save(savedOrder);
+        Order completedOrder = orderService.place(savedOrder);
 
         return OrderInfo.Detail.from(completedOrder);
     }
@@ -70,7 +70,7 @@ public class OrderFacade {
     public OrderInfo.Detail getOrderDetail(OrderCommand.GetDetail command) {
         validateUserExists(command.userId());
 
-        Order order = orderService.findByIdAndUserId(command.orderId(), command.userId());
+        Order order = orderService.get(command.orderId(), command.userId());
 
         return OrderInfo.Detail.from(order);
     }
@@ -79,7 +79,7 @@ public class OrderFacade {
     public OrderInfo.OrderList getMyOrders(OrderCommand.GetMyOrders command) {
         validateUserExists(command.userId());
 
-        List<Order> orders = orderService.findByUserId(command.userId());
+        List<Order> orders = orderService.getAllByUser(command.userId());
 
         List<OrderInfo.Summary> orderSummaries = orders.stream()
             .map(OrderInfo.Summary::from)
@@ -89,6 +89,6 @@ public class OrderFacade {
     }
 
     private void validateUserExists(String userId) {
-        userService.findByUserId(userId);
+        userService.get(userId);
     }
 }
