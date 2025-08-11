@@ -59,7 +59,7 @@ class ProductServiceTest {
             when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
             //when
-            Product result = productService.findById(productId);
+            Product result = productService.get(productId);
 
             //then
             assertThat(result).isEqualTo(product);
@@ -74,7 +74,7 @@ class ProductServiceTest {
             when(productRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
             //when & then
-            assertThatThrownBy(() -> productService.findById(nonExistentId))
+            assertThatThrownBy(() -> productService.get(nonExistentId))
                 .isInstanceOf(CoreException.class)
                 .satisfies(exception -> {
                     CoreException coreException = (CoreException) exception;

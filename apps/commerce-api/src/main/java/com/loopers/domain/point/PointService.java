@@ -16,7 +16,7 @@ public class PointService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public Long getPointAmount(String userId) {
+    public Long getAmount(String userId) {
         if (!userRepository.existsByUserId(userId)) {
             return null;
         }
@@ -31,7 +31,7 @@ public class PointService {
     }
 
     @Transactional
-    public Long chargePoint(String userId, Long chargeAmount) {
+    public Long charge(String userId, Long chargeAmount) {
         if (!userRepository.existsByUserId(userId)) {
             throw new CoreException(ErrorType.NOT_FOUND,
                 "[userId = " + userId + "] 해당 유저가 존재하지 않습니다.");
@@ -50,7 +50,7 @@ public class PointService {
     }
 
     @Transactional
-    public Long usePoint(String userId, Long useAmount) {
+    public Long use(String userId, Long useAmount) {
         if (!userRepository.existsByUserId(userId)) {
             throw new CoreException(ErrorType.NOT_FOUND,
                 "[userId = " + userId + "] 해당 유저가 존재하지 않습니다.");

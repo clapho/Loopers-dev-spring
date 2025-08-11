@@ -108,7 +108,7 @@ public class OrderFacadeIntegrationTest {
             String userId = "user1";
             userService.signUp(userId, "사용자1", Gender.M, "abc@gmail.com", "1995-03-01");
 
-            pointService.chargePoint(userId, 50000L);
+            pointService.charge(userId, 50000L);
 
             Brand brand1 = brandService.create("brand1", "description1");
             Product product1 = productService.create("product1", Money.of(10000L), Quantity.of(100), brand1.getId());
@@ -157,7 +157,7 @@ public class OrderFacadeIntegrationTest {
             // given
             String userId = "user1";
             userService.signUp(userId, "사용자1", Gender.M, "abc@gmail.com", "1995-03-01");
-            pointService.chargePoint(userId, 50000L);
+            pointService.charge(userId, 50000L);
 
             Brand brand1 = brandService.create("brand1", "description1");
             Product product1 = productService.create("product1", Money.of(10000L), Quantity.of(100), brand1.getId());
@@ -182,7 +182,7 @@ public class OrderFacadeIntegrationTest {
 
             // then
             verify(userRepository, times(1)).findByUserId(userId);
-            verify(couponService, times(1)).getUserCoupon(savedCoupon.getId(), userId);
+            verify(couponService, times(1)).get(savedCoupon.getId(), userId);
             verify(orderRepository, times(2)).save(any());
 
             assertAll(
@@ -200,7 +200,7 @@ public class OrderFacadeIntegrationTest {
             // given
             String userId = "user1";
             userService.signUp(userId, "사용자1", Gender.M, "abc@gmail.com", "1995-03-01");
-            pointService.chargePoint(userId, 50000L);
+            pointService.charge(userId, 50000L);
 
             Brand brand1 = brandService.create("brand1", "description1");
             Product product1 = productService.create("product1", Money.of(10000L), Quantity.of(1), brand1.getId());
@@ -230,7 +230,7 @@ public class OrderFacadeIntegrationTest {
             // given
             String userId = "user1";
             userService.signUp(userId, "사용자1", Gender.M, "abc@gmail.com", "1995-03-01");
-            pointService.chargePoint(userId, 5000L);
+            pointService.charge(userId, 5000L);
 
             Brand brand1 = brandService.create("brand1", "description1");
             Product product1 = productService.create("product1", Money.of(10000L), Quantity.of(100), brand1.getId());
@@ -283,7 +283,7 @@ public class OrderFacadeIntegrationTest {
             // given
             String userId = "user1";
             userService.signUp(userId, "사용자1", Gender.M, "abc@gmail.com", "1995-03-01");
-            pointService.chargePoint(userId, 50000L);
+            pointService.charge(userId, 50000L);
 
             Long nonExistentProductId = 999L;
             List<OrderItemCommand.Create> items = List.of(
@@ -311,7 +311,7 @@ public class OrderFacadeIntegrationTest {
             // given
             String userId = "user1";
             userService.signUp(userId, "사용자1", Gender.M, "abc@gmail.com", "1995-03-01");
-            pointService.chargePoint(userId, 50000L);
+            pointService.charge(userId, 50000L);
 
             Brand brand1 = brandService.create("brand1", "description1");
             Product product1 = productService.create("product1", Money.of(10000L), Quantity.of(100), brand1.getId());
@@ -333,7 +333,7 @@ public class OrderFacadeIntegrationTest {
                 });
 
             verify(userRepository, times(1)).findByUserId(userId);
-            verify(couponService, times(1)).getUserCoupon(nonExistentCouponId, userId);
+            verify(couponService, times(1)).get(nonExistentCouponId, userId);
         }
     }
 
@@ -347,7 +347,7 @@ public class OrderFacadeIntegrationTest {
             // given
             String userId = "user1";
             userService.signUp(userId, "사용자1", Gender.M, "abc@gmail.com", "1995-03-01");
-            pointService.chargePoint(userId, 50000L);
+            pointService.charge(userId, 50000L);
 
             Brand brand1 = brandService.create("brand1", "description1");
             Product product1 = productService.create("product1", Money.of(10000L), Quantity.of(100), brand1.getId());
@@ -389,7 +389,7 @@ public class OrderFacadeIntegrationTest {
             // given
             String userId = "user1";
             userService.signUp(userId, "사용자1", Gender.M, "abc@gmail.com", "1995-03-01");
-            pointService.chargePoint(userId, 100000L);
+            pointService.charge(userId, 100000L);
 
             Brand brand1 = brandService.create("brand1", "description1");
             Product product1 = productService.create("product1", Money.of(10000L), Quantity.of(100), brand1.getId());

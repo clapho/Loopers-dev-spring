@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.RequestHeader;
 public interface PointV1ApiSpec {
 
     @Operation(summary = "포인트 조회")
-    ApiResponse<PointV1Dto.PointResponse> getPoint(
+    ApiResponse<PointV1Dto.PointResponse> get(
         @RequestHeader("X-USER-ID") String userId
     );
 
     @Operation(summary = "포인트 충전")
-    ApiResponse<PointV1Dto.PointResponse> chargePoint(
+    ApiResponse<PointV1Dto.PointResponse> charge(
         @RequestHeader("X-USER-ID") String userId,
         @RequestBody PointV1Dto.ChargeRequest chargeRequest
     );

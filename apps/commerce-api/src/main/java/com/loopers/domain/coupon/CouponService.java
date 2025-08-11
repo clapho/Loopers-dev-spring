@@ -17,7 +17,7 @@ public class CouponService {
     @Transactional
     public Money apply(Long couponId, String userId, Money orderAmount) {
         try {
-            Coupon coupon = getUserCoupon(couponId, userId);
+            Coupon coupon = get(couponId, userId);
 
             Money discountAmount = coupon.calculateDiscountAmount(orderAmount);
 
@@ -33,7 +33,7 @@ public class CouponService {
         }
     }
 
-    public Coupon getUserCoupon(Long couponId, String userId) {
+    public Coupon get(Long couponId, String userId) {
         return couponRepository.findByIdAndUserId(couponId, userId)
             .orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND,

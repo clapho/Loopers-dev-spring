@@ -16,7 +16,7 @@ public class BrandService {
         return brandRepository.save(brand);
     }
 
-    public Brand findById(Long id) {
+    public Brand get(Long id) {
         Brand brand = brandRepository.findById(id);
 
         if (brand == null) {

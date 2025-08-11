@@ -23,24 +23,24 @@ public class ProductFacade {
 
     @Transactional(readOnly = true)
     public ProductInfo.Detail getProductDetail(ProductCommand.GetDetail command) {
-        Product product = productService.findById(command.productId());
+        Product product = productService.get(command.productId());
 
-        Brand brand = brandService.findById(product.getBrandId());
+        Brand brand = brandService.get(product.getBrandId());
 
-        long likeCount = likeService.countLikesByProduct(command.productId());
+        long likeCount = likeService.countByProduct(command.productId());
 
         return ProductInfo.Detail.from(product, brand, likeCount);
     }
 
     @Transactional(readOnly = true)
     public ProductInfo.PagedList getProducts(ProductCommand.GetList command) {
-        List<Product> products = productService.findProductsWithSortingAndPaging(
+        List<Product> products = productService.getAllWithSortingAndPaging(
             command.sort(),
             command.page(),
             command.size()
         );
 
-        long totalCount = productService.countProducts();
+        long totalCount = productService.count();
 
         List<ProductInfo.Detail> productDetails = products.stream()
             .map(this::buildProductDetail)
@@ -53,13 +53,13 @@ public class ProductFacade {
     public ProductInfo.PagedList getLikedProducts(ProductCommand.GetLikedProducts command) {
         validateUserExists(command.userId());
 
-        List<Like> likes = likeService.findLikesByUserIdWithPaging(
+        List<Like> likes = likeService.getAllByUserWithPaging(
             command.userId(),
             command.page(),
             command.size()
         );
 
-        long totalCount = likeService.countLikesByUser(command.userId());
+        long totalCount = likeService.countByUser(command.userId());
 
         List<ProductInfo.Detail> productDetails = likes.stream()
             .map(this::buildLikedProductDetail)
@@ -69,23 +69,23 @@ public class ProductFacade {
     }
 
     private void validateUserExists(String userId) {
-        userService.findByUserId(userId);
+        userService.get(userId);
     }
 
     private ProductInfo.Detail buildProductDetail(Product product) {
-        Brand brand = brandService.findById(product.getBrandId());
+        Brand brand = brandService.get(product.getBrandId());
 
-        long likeCount = likeService.countLikesByProduct(product.getId());
+        long likeCount = likeService.countByProduct(product.getId());
 
         return ProductInfo.Detail.from(product, brand, likeCount);
     }
 
     private ProductInfo.Detail buildLikedProductDetail(Like like) {
-        Product product = productService.findById(like.getProductId());
+        Product product = productService.get(like.getProductId());
 
-        Brand brand = brandService.findById(product.getBrandId());
+        Brand brand = brandService.get(product.getBrandId());
 
-        long likeCount = likeService.countLikesByProduct(product.getId());
+        long likeCount = likeService.countByProduct(product.getId());
 
         return ProductInfo.Detail.from(product, brand, likeCount);
     }

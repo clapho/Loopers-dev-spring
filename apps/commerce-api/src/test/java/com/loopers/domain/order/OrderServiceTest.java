@@ -40,7 +40,7 @@ class OrderServiceTest {
             when(orderRepository.save(order)).thenReturn(order);
 
             //when
-            Order result = orderService.save(order);
+            Order result = orderService.place(order);
 
             //then
             assertThat(result).isEqualTo(order);
@@ -61,7 +61,7 @@ class OrderServiceTest {
             when(orderRepository.findById(orderId)).thenReturn(order);
 
             //when
-            Order result = orderService.findById(orderId);
+            Order result = orderService.get(orderId);
 
             //then
             assertThat(result).isEqualTo(order);
@@ -76,7 +76,7 @@ class OrderServiceTest {
             when(orderRepository.findById(nonExistentId)).thenReturn(null);
 
             //when & then
-            assertThatThrownBy(() -> orderService.findById(nonExistentId))
+            assertThatThrownBy(() -> orderService.get(nonExistentId))
                 .isInstanceOf(CoreException.class)
                 .satisfies(exception -> {
                     CoreException coreException = (CoreException) exception;
@@ -97,7 +97,7 @@ class OrderServiceTest {
             when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(order);
 
             //when
-            Order result = orderService.findByIdAndUserId(orderId, userId);
+            Order result = orderService.get(orderId, userId);
 
             //then
             assertThat(result).isEqualTo(order);
@@ -114,7 +114,7 @@ class OrderServiceTest {
             when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(null);
 
             //when & then
-            assertThatThrownBy(() -> orderService.findByIdAndUserId(orderId, userId))
+            assertThatThrownBy(() -> orderService.get(orderId, userId))
                 .isInstanceOf(CoreException.class)
                 .satisfies(exception -> {
                     CoreException coreException = (CoreException) exception;
@@ -136,7 +136,7 @@ class OrderServiceTest {
             when(orderRepository.findByUserIdOrderByOrderedAtDesc(userId)).thenReturn(orders);
 
             //when
-            List<Order> result = orderService.findByUserId(userId);
+            List<Order> result = orderService.getAllByUser(userId);
 
             //then
             assertThat(result).hasSize(2);
@@ -152,7 +152,7 @@ class OrderServiceTest {
             when(orderRepository.findByUserIdOrderByOrderedAtDesc(userId)).thenReturn(List.of());
 
             //when
-            List<Order> result = orderService.findByUserId(userId);
+            List<Order> result = orderService.getAllByUser(userId);
 
             //then
             assertThat(result).isEmpty();
