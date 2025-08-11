@@ -3,6 +3,7 @@ package com.loopers.domain.like;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -10,7 +11,8 @@ public class LikeService {
 
     private final LikeRepository likeRepository;
 
-    public Like create(String userId, Long productId) {
+    @Transactional
+    public Like like(String userId, Long productId) {
         Like existingLike = likeRepository.findByUserIdAndProductId(userId, productId);
         if (existingLike != null) {
             return existingLike;
@@ -20,27 +22,28 @@ public class LikeService {
         return likeRepository.save(like);
     }
 
-    public void delete(String userId, Long productId) {
+    @Transactional
+    public void unlike(String userId, Long productId) {
         likeRepository.deleteByUserIdAndProductId(userId, productId);
     }
 
-    public List<Like> findLikesByUser(String userId) {
+    public List<Like> getAllByUser(String userId) {
         return likeRepository.findByUserId(userId);
     }
 
-    public long countLikesByProduct(Long productId) {
-        return likeRepository.countByProductId(productId);
+    public List<Like> getAllByUserWithPaging(String userId, int page, int size) {
+        return likeRepository.findLikesByUserIdWithPaging(userId, page, size);
     }
 
-    public boolean isLikedByUser(String userId, Long productId) {
+    public boolean isLiked(String userId, Long productId) {
         return likeRepository.existsByUserIdAndProductId(userId, productId);
     }
 
-    public long countLikesByUser(String userId) {
-        return likeRepository.countByUserId(userId);
+    public long countByProduct(Long productId) {
+        return likeRepository.countByProductId(productId);
     }
 
-    public List<Like> findLikesByUserIdWithPaging(String userId, int page, int size) {
-        return likeRepository.findLikesByUserIdWithPaging(userId, page, size);
+    public long countByUser(String userId) {
+        return likeRepository.countByUserId(userId);
     }
 }

@@ -23,13 +23,13 @@ public class PointV1Controller implements PointV1ApiSpec{
 
     @GetMapping
     @Override
-    public ApiResponse<PointResponse> getPoint(@RequestHeader ("X-USER-ID") String userId) {
+    public ApiResponse<PointResponse> get(@RequestHeader ("X-USER-ID") String userId) {
 
         if (userId == null || userId.trim().isEmpty()) {
             throw new CoreException(ErrorType.BAD_REQUEST, "X-USER-ID 값이 비어있습니다.");
         }
 
-        Long amount = pointService.getPointAmount(userId);
+        Long amount = pointService.getAmount(userId);
 
         if (amount == null) {
             throw new CoreException(ErrorType.NOT_FOUND,
@@ -41,7 +41,7 @@ public class PointV1Controller implements PointV1ApiSpec{
 
     @PostMapping
     @Override
-    public ApiResponse<PointResponse> chargePoint(
+    public ApiResponse<PointResponse> charge(
         @RequestHeader("X-USER-ID") String userId,
         @RequestBody ChargeRequest chargeRequest
     ) {
@@ -49,7 +49,7 @@ public class PointV1Controller implements PointV1ApiSpec{
             throw new CoreException(ErrorType.BAD_REQUEST, "X-USER-ID 값이 비어있습니다.");
         }
 
-        Long totalAmount = pointService.chargePoint(userId, chargeRequest.amount());
+        Long totalAmount = pointService.charge(userId, chargeRequest.amount());
         return ApiResponse.success(new PointResponse(totalAmount));
     }
 

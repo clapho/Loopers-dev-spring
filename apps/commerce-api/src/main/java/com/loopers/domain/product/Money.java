@@ -32,6 +32,15 @@ public class Money {
         return new Money(BigDecimal.valueOf(value));
     }
 
+    public Money subtract(Money other) {
+        if (other == null) {
+            return this;
+        }
+
+        BigDecimal result = this.value.subtract(other.value);
+        return Money.of(result);
+    }
+
     public BigDecimal getValue() {
         return value;
     }

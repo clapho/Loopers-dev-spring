@@ -106,9 +106,9 @@ public class LikeFacadeIntegrationTest {
             // then
             verify(userRepository, times(1)).findByUserId(userId);
             verify(productRepository, times(1)).findById(product.getId());
-            verify(likeService, times(1)).isLikedByUser(userId, product.getId());
-            verify(likeService, times(1)).create(userId, product.getId());
-            verify(likeService, times(1)).countLikesByProduct(product.getId());
+            verify(likeService, times(1)).isLiked(userId, product.getId());
+            verify(likeService, times(1)).like(userId, product.getId());
+            verify(likeService, times(1)).countByProduct(product.getId());
 
             assertAll(
                 () -> assertThat(result).isNotNull(),
@@ -147,9 +147,9 @@ public class LikeFacadeIntegrationTest {
             LikeInfo.Like result = likeFacade.addLike(command);
 
             // then
-            verify(likeService, times(2)).isLikedByUser(userId, product.getId());
-            verify(likeService, times(1)).create(userId, product.getId());
-            verify(likeService, times(2)).countLikesByProduct(product.getId());
+            verify(likeService, times(2)).isLiked(userId, product.getId());
+            verify(likeService, times(1)).like(userId, product.getId());
+            verify(likeService, times(2)).countByProduct(product.getId());
 
             assertAll(
                 () -> assertThat(result).isNotNull(),
@@ -185,7 +185,7 @@ public class LikeFacadeIntegrationTest {
                 });
 
             verify(userRepository, times(1)).findByUserId(nonExistentUserId);
-            verify(likeService, never()).create(anyString(), anyLong());
+            verify(likeService, never()).like(anyString(), anyLong());
         }
 
         @Test
@@ -216,7 +216,7 @@ public class LikeFacadeIntegrationTest {
 
             verify(userRepository, times(1)).findByUserId(userId);
             verify(productRepository, times(1)).findById(nonExistentProductId);
-            verify(likeService, never()).create(anyString(), anyLong());
+            verify(likeService, never()).like(anyString(), anyLong());
         }
     }
 
@@ -255,7 +255,7 @@ public class LikeFacadeIntegrationTest {
             LikeInfo.Like result = likeFacade.removeLike(removeCommand);
 
             // then
-            verify(likeService, times(1)).delete(userId, product.getId());
+            verify(likeService, times(1)).unlike(userId, product.getId());
 
             assertAll(
                 () -> assertThat(result).isNotNull(),
@@ -293,9 +293,9 @@ public class LikeFacadeIntegrationTest {
             LikeInfo.Like result = likeFacade.removeLike(command);
 
             // then
-            verify(likeService, times(1)).isLikedByUser(userId, product.getId());
-            verify(likeService, never()).delete(userId, product.getId());
-            verify(likeService, times(1)).countLikesByProduct(product.getId());
+            verify(likeService, times(1)).isLiked(userId, product.getId());
+            verify(likeService, never()).unlike(userId, product.getId());
+            verify(likeService, times(1)).countByProduct(product.getId());
 
             assertAll(
                 () -> assertThat(result).isNotNull(),
@@ -331,7 +331,7 @@ public class LikeFacadeIntegrationTest {
                 });
 
             verify(userRepository, times(1)).findByUserId(nonExistentUserId);
-            verify(likeService, never()).delete(anyString(), anyLong());
+            verify(likeService, never()).unlike(anyString(), anyLong());
         }
 
         @Test
@@ -362,7 +362,7 @@ public class LikeFacadeIntegrationTest {
 
             verify(userRepository, times(1)).findByUserId(userId);
             verify(productRepository, times(1)).findById(nonExistentProductId);
-            verify(likeService, never()).delete(anyString(), anyLong());
+            verify(likeService, never()).unlike(anyString(), anyLong());
         }
     }
 }

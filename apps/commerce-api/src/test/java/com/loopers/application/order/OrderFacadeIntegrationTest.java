@@ -10,6 +10,11 @@ import static org.mockito.Mockito.verify;
 import com.loopers.domain.brand.Brand;
 import com.loopers.domain.brand.BrandRepository;
 import com.loopers.domain.brand.BrandService;
+import com.loopers.domain.coupon.Coupon;
+import com.loopers.domain.coupon.CouponRepository;
+import com.loopers.domain.coupon.CouponService;
+import com.loopers.domain.coupon.DiscountAmount;
+import com.loopers.domain.coupon.FixedAmountCoupon;
 import com.loopers.domain.order.OrderRepository;
 import com.loopers.domain.order.OrderService;
 import com.loopers.domain.order.OrderStatus;
@@ -27,6 +32,8 @@ import com.loopers.domain.user.UserService;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import com.loopers.utils.DatabaseCleanUp;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -55,6 +62,9 @@ public class OrderFacadeIntegrationTest {
     @Autowired
     private PointService pointService;
 
+    @Autowired
+    private CouponRepository couponRepository;
+
     @MockitoSpyBean
     private OrderService orderService;
 
@@ -76,6 +86,9 @@ public class OrderFacadeIntegrationTest {
     @MockitoSpyBean
     private ExternalOrderService externalOrderService;
 
+    @MockitoSpyBean
+    private CouponService couponService;
+
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
 
@@ -95,7 +108,7 @@ public class OrderFacadeIntegrationTest {
             String userId = "user1";
             userService.signUp(userId, "사용자1", Gender.M, "abc@gmail.com", "1995-03-01");
 
-            pointService.chargePoint(userId, 50000L);
+            pointService.charge(userId, 50000L);
 
             Brand brand1 = brandService.create("brand1", "description1");
             Product product1 = productService.create("product1", Money.of(10000L), Quantity.of(100), brand1.getId());
@@ -106,7 +119,7 @@ public class OrderFacadeIntegrationTest {
                 new OrderItemCommand.Create(product2.getId(), Quantity.of(1))
             );
 
-            OrderCommand.Create command = new OrderCommand.Create(userId, items);
+            OrderCommand.Create command = new OrderCommand.Create(userId, items, null);
 
             // when
             OrderInfo.Detail result = orderFacade.createOrder(command);
@@ -139,12 +152,55 @@ public class OrderFacadeIntegrationTest {
         }
 
         @Test
+        @DisplayName("쿠폰 적용하여 주문 생성이 성공한다")
+        void createOrder_withCoupon() {
+            // given
+            String userId = "user1";
+            userService.signUp(userId, "사용자1", Gender.M, "abc@gmail.com", "1995-03-01");
+            pointService.charge(userId, 50000L);
+
+            Brand brand1 = brandService.create("brand1", "description1");
+            Product product1 = productService.create("product1", Money.of(10000L), Quantity.of(100), brand1.getId());
+
+            FixedAmountCoupon coupon = FixedAmountCoupon.create(
+                "1000원 할인 쿠폰",
+                userId,
+                DiscountAmount.of(BigDecimal.valueOf(1000)),
+                Money.of(5000),
+                LocalDateTime.now().plusDays(7)
+            );
+            Coupon savedCoupon = couponRepository.save(coupon);
+
+            List<OrderItemCommand.Create> items = List.of(
+                new OrderItemCommand.Create(product1.getId(), Quantity.of(1))
+            );
+
+            OrderCommand.Create command = new OrderCommand.Create(userId, items, savedCoupon.getId());
+
+            // when
+            OrderInfo.Detail result = orderFacade.createOrder(command);
+
+            // then
+            verify(userRepository, times(1)).findByUserId(userId);
+            verify(couponService, times(1)).get(savedCoupon.getId(), userId);
+            verify(orderRepository, times(2)).save(any());
+
+            assertAll(
+                () -> assertThat(result).isNotNull(),
+                () -> assertThat(result.userId()).isEqualTo(userId),
+                () -> assertThat(result.totalPrice()).isEqualTo(Money.of(10000L)),
+                () -> assertThat(result.status()).isEqualTo(OrderStatus.COMPLETED),
+                () -> assertThat(result.items()).hasSize(1)
+            );
+        }
+
+        @Test
         @DisplayName("재고가 부족할 때 주문 생성이 실패한다")
         void fail_whenStockInsufficient() {
             // given
             String userId = "user1";
             userService.signUp(userId, "사용자1", Gender.M, "abc@gmail.com", "1995-03-01");
-            pointService.chargePoint(userId, 50000L);
+            pointService.charge(userId, 50000L);
 
             Brand brand1 = brandService.create("brand1", "description1");
             Product product1 = productService.create("product1", Money.of(10000L), Quantity.of(1), brand1.getId());
@@ -153,7 +209,7 @@ public class OrderFacadeIntegrationTest {
                 new OrderItemCommand.Create(product1.getId(), Quantity.of(2))
             );
 
-            OrderCommand.Create command = new OrderCommand.Create(userId, items);
+            OrderCommand.Create command = new OrderCommand.Create(userId, items, null);
 
             // when & then
             assertThatThrownBy(() -> orderFacade.createOrder(command))
@@ -174,7 +230,7 @@ public class OrderFacadeIntegrationTest {
             // given
             String userId = "user1";
             userService.signUp(userId, "사용자1", Gender.M, "abc@gmail.com", "1995-03-01");
-            pointService.chargePoint(userId, 5000L);
+            pointService.charge(userId, 5000L);
 
             Brand brand1 = brandService.create("brand1", "description1");
             Product product1 = productService.create("product1", Money.of(10000L), Quantity.of(100), brand1.getId());
@@ -183,7 +239,7 @@ public class OrderFacadeIntegrationTest {
                 new OrderItemCommand.Create(product1.getId(), Quantity.of(1))
             );
 
-            OrderCommand.Create command = new OrderCommand.Create(userId, items);
+            OrderCommand.Create command = new OrderCommand.Create(userId, items, null);
 
             // when & then
             assertThatThrownBy(() -> orderFacade.createOrder(command))
@@ -207,7 +263,7 @@ public class OrderFacadeIntegrationTest {
                 new OrderItemCommand.Create(product1.getId(), Quantity.of(1))
             );
 
-            OrderCommand.Create command = new OrderCommand.Create(nonExistentUserId, items);
+            OrderCommand.Create command = new OrderCommand.Create(nonExistentUserId, items, null);
 
             // when & then
             assertThatThrownBy(() -> orderFacade.createOrder(command))
@@ -227,14 +283,14 @@ public class OrderFacadeIntegrationTest {
             // given
             String userId = "user1";
             userService.signUp(userId, "사용자1", Gender.M, "abc@gmail.com", "1995-03-01");
-            pointService.chargePoint(userId, 50000L);
+            pointService.charge(userId, 50000L);
 
             Long nonExistentProductId = 999L;
             List<OrderItemCommand.Create> items = List.of(
                 new OrderItemCommand.Create(nonExistentProductId, Quantity.of(1))
             );
 
-            OrderCommand.Create command = new OrderCommand.Create(userId, items);
+            OrderCommand.Create command = new OrderCommand.Create(userId, items, null);
 
             // when & then
             assertThatThrownBy(() -> orderFacade.createOrder(command))
@@ -248,6 +304,37 @@ public class OrderFacadeIntegrationTest {
             verify(userRepository, times(1)).findByUserId(userId);
             verify(productRepository, times(1)).findById(nonExistentProductId);
         }
+
+        @Test
+        @DisplayName("존재하지 않는 쿠폰으로 주문 생성 시 실패한다")
+        void fail_whenCouponNotExists() {
+            // given
+            String userId = "user1";
+            userService.signUp(userId, "사용자1", Gender.M, "abc@gmail.com", "1995-03-01");
+            pointService.charge(userId, 50000L);
+
+            Brand brand1 = brandService.create("brand1", "description1");
+            Product product1 = productService.create("product1", Money.of(10000L), Quantity.of(100), brand1.getId());
+
+            List<OrderItemCommand.Create> items = List.of(
+                new OrderItemCommand.Create(product1.getId(), Quantity.of(1))
+            );
+
+            Long nonExistentCouponId = 999L;
+            OrderCommand.Create command = new OrderCommand.Create(userId, items, nonExistentCouponId);
+
+            // when & then
+            assertThatThrownBy(() -> orderFacade.createOrder(command))
+                .isInstanceOf(CoreException.class)
+                .satisfies(exception -> {
+                    CoreException coreException = (CoreException) exception;
+                    assertThat(coreException.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
+                    assertThat(coreException.getMessage()).contains("쿠폰을 찾을 수 없습니다");
+                });
+
+            verify(userRepository, times(1)).findByUserId(userId);
+            verify(couponService, times(1)).get(nonExistentCouponId, userId);
+        }
     }
 
     @DisplayName("주문 상세 조회")
@@ -260,7 +347,7 @@ public class OrderFacadeIntegrationTest {
             // given
             String userId = "user1";
             userService.signUp(userId, "사용자1", Gender.M, "abc@gmail.com", "1995-03-01");
-            pointService.chargePoint(userId, 50000L);
+            pointService.charge(userId, 50000L);
 
             Brand brand1 = brandService.create("brand1", "description1");
             Product product1 = productService.create("product1", Money.of(10000L), Quantity.of(100), brand1.getId());
@@ -269,7 +356,7 @@ public class OrderFacadeIntegrationTest {
                 new OrderItemCommand.Create(product1.getId(), Quantity.of(2))
             );
 
-            OrderCommand.Create createCommand = new OrderCommand.Create(userId, items);
+            OrderCommand.Create createCommand = new OrderCommand.Create(userId, items, null);
             OrderInfo.Detail createdOrder = orderFacade.createOrder(createCommand);
 
             OrderCommand.GetDetail command = new OrderCommand.GetDetail(createdOrder.orderId(), userId);
@@ -302,7 +389,7 @@ public class OrderFacadeIntegrationTest {
             // given
             String userId = "user1";
             userService.signUp(userId, "사용자1", Gender.M, "abc@gmail.com", "1995-03-01");
-            pointService.chargePoint(userId, 100000L);
+            pointService.charge(userId, 100000L);
 
             Brand brand1 = brandService.create("brand1", "description1");
             Product product1 = productService.create("product1", Money.of(10000L), Quantity.of(100), brand1.getId());
@@ -310,9 +397,9 @@ public class OrderFacadeIntegrationTest {
 
             // 2개 주문 생성
             OrderCommand.Create createCommand1 = new OrderCommand.Create(userId,
-                List.of(new OrderItemCommand.Create(product1.getId(), Quantity.of(1))));
+                List.of(new OrderItemCommand.Create(product1.getId(), Quantity.of(1))), null);
             OrderCommand.Create createCommand2 = new OrderCommand.Create(userId,
-                List.of(new OrderItemCommand.Create(product2.getId(), Quantity.of(2))));
+                List.of(new OrderItemCommand.Create(product2.getId(), Quantity.of(2))), null);
 
             orderFacade.createOrder(createCommand1);
             orderFacade.createOrder(createCommand2);

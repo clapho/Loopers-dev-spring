@@ -36,7 +36,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public User findByUserId(String userId) {
+    public User get(String userId) {
         User user = userRepository.findByUserId(userId);
         if (user == null) {
             throw new CoreException(

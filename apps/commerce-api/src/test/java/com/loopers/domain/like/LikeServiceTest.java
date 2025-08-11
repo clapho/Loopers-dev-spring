@@ -40,7 +40,7 @@ class LikeServiceTest {
             when(likeRepository.save(any(Like.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             //when
-            likeService.create(userId, productId);
+            likeService.like(userId, productId);
 
             //then
             verify(likeRepository).findByUserIdAndProductId(userId, productId);
@@ -58,7 +58,7 @@ class LikeServiceTest {
             when(likeRepository.findByUserIdAndProductId(userId, productId)).thenReturn(existingLike);
 
             //when
-            Like result = likeService.create(userId, productId);
+            Like result = likeService.like(userId, productId);
 
             //then
             assertThat(result).isEqualTo(existingLike);
@@ -79,7 +79,7 @@ class LikeServiceTest {
             Long productId = 1L;
 
             //when
-            likeService.delete(userId, productId);
+            likeService.unlike(userId, productId);
 
             //then
             verify(likeRepository).deleteByUserIdAndProductId(userId, productId);
@@ -103,7 +103,7 @@ class LikeServiceTest {
             when(likeRepository.findByUserId(userId)).thenReturn(likes);
 
             //when
-            List<Like> result = likeService.findLikesByUser(userId);
+            List<Like> result = likeService.getAllByUser(userId);
 
             //then
             assertThat(result).hasSize(2);
@@ -121,7 +121,7 @@ class LikeServiceTest {
             when(likeRepository.countByProductId(productId)).thenReturn(expectedCount);
 
             //when
-            long result = likeService.countLikesByProduct(productId);
+            long result = likeService.countByProduct(productId);
 
             //then
             assertThat(result).isEqualTo(expectedCount);
@@ -138,7 +138,7 @@ class LikeServiceTest {
             when(likeRepository.existsByUserIdAndProductId(userId, productId)).thenReturn(true);
 
             //when
-            boolean result = likeService.isLikedByUser(userId, productId);
+            boolean result = likeService.isLiked(userId, productId);
 
             //then
             assertThat(result).isTrue();

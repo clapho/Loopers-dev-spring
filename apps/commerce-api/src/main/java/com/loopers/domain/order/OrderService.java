@@ -2,10 +2,9 @@ package com.loopers.domain.order;
 
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -13,11 +12,11 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
 
-    public Order save(Order order) {
+    public Order place(Order order) {
         return orderRepository.save(order);
     }
 
-    public Order findById(Long id) {
+    public Order get(Long id) {
         Order order = orderRepository.findById(id);
 
         if (order == null) {
@@ -30,7 +29,7 @@ public class OrderService {
         return order;
     }
 
-    public Order findByIdAndUserId(Long orderId, String userId) {
+    public Order get(Long orderId, String userId) {
         Order order = orderRepository.findByIdAndUserId(orderId, userId);
 
         if (order == null) {
@@ -43,7 +42,7 @@ public class OrderService {
         return order;
     }
 
-    public List<Order> findByUserId(String userId) {
+    public List<Order> getAllByUser(String userId) {
         return orderRepository.findByUserIdOrderByOrderedAtDesc(userId);
     }
 }

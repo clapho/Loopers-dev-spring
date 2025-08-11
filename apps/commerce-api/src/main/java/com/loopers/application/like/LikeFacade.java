@@ -23,10 +23,10 @@ public class LikeFacade {
     public LikeInfo.Like addLike(LikeCommand.Add command) {
         validateLikeCommand(command.userId(), command.productId());
 
-        boolean alreadyLiked = likeService.isLikedByUser(command.userId(), command.productId());
+        boolean alreadyLiked = likeService.isLiked(command.userId(), command.productId());
 
         if (!alreadyLiked) {
-            likeService.create(command.userId(), command.productId());
+            likeService.like(command.userId(), command.productId());
         }
 
         return buildLikeInfo(command.productId(), true);
@@ -36,10 +36,10 @@ public class LikeFacade {
     public LikeInfo.Like removeLike(LikeCommand.Remove command) {
         validateLikeCommand(command.userId(), command.productId());
 
-        boolean currentlyLiked = likeService.isLikedByUser(command.userId(), command.productId());
+        boolean currentlyLiked = likeService.isLiked(command.userId(), command.productId());
 
         if (currentlyLiked) {
-            likeService.delete(command.userId(), command.productId());
+            likeService.unlike(command.userId(), command.productId());
         }
 
         return buildLikeInfo(command.productId(), false);
@@ -51,14 +51,14 @@ public class LikeFacade {
     }
 
     private void validateUserExists(String userId) {
-        User user = userService.findByUserId(userId);
+        User user = userService.get(userId);
         if (user == null) {
             throw new CoreException(ErrorType.NOT_FOUND, "사용자가 존재하지 않습니다.");
         }
     }
 
     private Product validateProductExists(Long productId) {
-        Product product = productService.findById(productId);
+        Product product = productService.get(productId);
         if (product == null) {
             throw new CoreException(ErrorType.NOT_FOUND, "상품이 존재하지 않습니다.");
         }
@@ -66,7 +66,7 @@ public class LikeFacade {
     }
 
     private LikeInfo.Like buildLikeInfo(Long productId, boolean isLiked) {
-        long likeCount = likeService.countLikesByProduct(productId);
+        long likeCount = likeService.countByProduct(productId);
         return new LikeInfo.Like(productId, isLiked, likeCount);
     }
 }

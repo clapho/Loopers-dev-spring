@@ -16,35 +16,32 @@ public class PointService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public Long getPointAmount(String userId) {
+    public Long getAmount(String userId) {
         if (!userRepository.existsByUserId(userId)) {
             return null;
         }
 
-        Point point = pointRepository.findByUserId(userId);
-
-        if (point == null) {
-            throw new CoreException(ErrorType.NOT_FOUND,
+        Point point = pointRepository.findByUserId(userId)
+            .orElseThrow(() -> new CoreException(
+                ErrorType.NOT_FOUND,
                 "[userId = " + userId + "] 포인트 정보를 찾을 수 없습니다."
-            );
-        }
+            ));
 
         return point.getAmount();
     }
 
     @Transactional
-    public Long chargePoint(String userId, Long chargeAmount) {
+    public Long charge(String userId, Long chargeAmount) {
         if (!userRepository.existsByUserId(userId)) {
             throw new CoreException(ErrorType.NOT_FOUND,
                 "[userId = " + userId + "] 해당 유저가 존재하지 않습니다.");
         }
 
-        Point point = pointRepository.findByUserId(userId);
-
-        if (point == null) {
-            throw new CoreException(ErrorType.NOT_FOUND,
-                "[userId = " + userId + "] 포인트 정보를 찾을 수 없습니다.");
-        }
+        Point point = pointRepository.findByUserIdWithLock(userId)
+            .orElseThrow(() -> new CoreException(
+                ErrorType.NOT_FOUND,
+                "[userId = " + userId + "] 포인트 정보를 찾을 수 없습니다."
+            ));
 
         point.charge(chargeAmount);
         pointRepository.save(point);
@@ -53,18 +50,17 @@ public class PointService {
     }
 
     @Transactional
-    public Long usePoint(String userId, Long useAmount) {
+    public Long use(String userId, Long useAmount) {
         if (!userRepository.existsByUserId(userId)) {
             throw new CoreException(ErrorType.NOT_FOUND,
                 "[userId = " + userId + "] 해당 유저가 존재하지 않습니다.");
         }
 
-        Point point = pointRepository.findByUserId(userId);
-
-        if (point == null) {
-            throw new CoreException(ErrorType.NOT_FOUND,
-                "[userId = " + userId + "] 포인트 정보를 찾을 수 없습니다.");
-        }
+        Point point = pointRepository.findByUserIdWithLock(userId)
+            .orElseThrow(() -> new CoreException(
+                ErrorType.NOT_FOUND,
+                "[userId = " + userId + "] 포인트 정보를 찾을 수 없습니다."
+            ));
 
         point.use(useAmount);
         pointRepository.save(point);

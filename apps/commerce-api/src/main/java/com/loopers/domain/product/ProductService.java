@@ -6,6 +6,7 @@ import com.loopers.support.error.ErrorType;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -13,6 +14,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
+    @Transactional
     public Product create(
         String name,
         Money price,
@@ -23,20 +25,17 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public Product findById(Long id) {
-        Product product = productRepository.findById(id);
-
-        if (product == null) {
-            throw new CoreException(
+    @Transactional(readOnly = true)
+    public Product get(Long id) {
+        return productRepository.findById(id)
+            .orElseThrow(() -> new CoreException(
                 ErrorType.NOT_FOUND,
                 "상품이 존재하지 않습니다."
-            );
-        }
-
-        return product;
+            ));
     }
 
-    public List<Product> findProductsWithSortingAndPaging(
+    @Transactional(readOnly = true)
+    public List<Product> getAllWithSortingAndPaging(
         ProductSortOption sort,
         int page,
         int size
@@ -44,7 +43,17 @@ public class ProductService {
         return productRepository.findAllWithSortingAndPaging(sort, page, size);
     }
 
-    public long countProducts() {
+    @Transactional
+    public void decreaseStock(Long productId, Quantity quantity) {
+        Product product = productRepository.findByIdWithLock(productId)
+            .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "상품이 존재하지 않습니다."));
+
+        product.decreaseStock(quantity);
+        productRepository.save(product);
+    }
+
+    @Transactional(readOnly = true)
+    public long count() {
         return productRepository.countAll();
     }
 }
