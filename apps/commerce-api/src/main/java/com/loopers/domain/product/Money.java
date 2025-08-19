@@ -2,13 +2,11 @@ package com.loopers.domain.product;
 
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
 
 @Embeddable
 public class Money {
-    @Column(name = "money", precision = 19, scale = 2)
     private BigDecimal value;
 
     protected Money() {}

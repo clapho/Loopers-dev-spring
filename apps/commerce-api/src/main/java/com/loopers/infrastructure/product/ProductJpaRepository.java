@@ -24,7 +24,7 @@ public interface ProductJpaRepository extends JpaRepository<Product, Long> {
     @Query("""
         SELECT p FROM Product p 
         LEFT JOIN Like l ON p.id = l.productId 
-        GROUP BY p.id, p.name, p.price.value, p.stockQuantity.value, p.brandId, p.createdAt
+        GROUP BY p.id, p.name, p.price, p.stockQuantity, p.brandId, p.createdAt
         ORDER BY COUNT(l.id) DESC
         """)
     Page<Product> findAllOrderByLikeCountDesc(Pageable pageable);
@@ -33,4 +33,23 @@ public interface ProductJpaRepository extends JpaRepository<Product, Long> {
     Page<Product> findAllByOrderByPriceValueAsc(Pageable pageable);
 
     Page<Product> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE p.brandId = :brandId")
+    Page<Product> findByBrandId(@Param("brandId") Long brandId, Pageable pageable);
+
+    @Query("""
+        SELECT p FROM Product p 
+        LEFT JOIN Like l ON p.id = l.productId 
+        WHERE p.brandId = :brandId
+        GROUP BY p.id, p.name, p.price, p.stockQuantity, p.brandId, p.createdAt
+        ORDER BY COUNT(l.id) DESC
+        """)
+    Page<Product> findByBrandIdOrderByLikeCountDesc(@Param("brandId") Long brandId, Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE p.brandId = :brandId ORDER BY p.price.value ASC")
+    Page<Product> findByBrandIdOrderByPrice(@Param("brandId") Long brandId, Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE p.brandId = :brandId ORDER BY p.createdAt DESC")
+    Page<Product> findByBrandIdOrderByCreatedAt(@Param("brandId") Long brandId, Pageable pageable);
+
 }
