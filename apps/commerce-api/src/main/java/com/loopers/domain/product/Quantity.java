@@ -2,12 +2,10 @@ package com.loopers.domain.product;
 
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class Quantity {
-    @Column(name = "quantity")
     private int value;
 
     protected Quantity() {}

@@ -4,6 +4,9 @@ import com.loopers.domain.product.Money;
 import com.loopers.domain.product.Quantity;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,9 +25,15 @@ public class OrderItem {
     Long id;
 
     @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "value", column = @Column(name = "stock_quantity"))
+    })
     Quantity quantity;
 
     @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "value", column = @Column(name = "price"))
+    })
     Money price;
 
     Long productId;

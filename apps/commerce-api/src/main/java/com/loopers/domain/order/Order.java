@@ -6,6 +6,7 @@ import com.loopers.domain.product.Quantity;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -33,6 +34,9 @@ public class Order {
     private Long id;
 
     @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "value", column = @Column(name = "total_price"))
+    })
     private Money totalPrice;
 
     @Embedded
