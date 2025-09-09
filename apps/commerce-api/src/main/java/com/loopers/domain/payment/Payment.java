@@ -9,6 +9,8 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
@@ -23,6 +25,7 @@ import lombok.NoArgsConstructor;
 public class Payment {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long orderId;
@@ -50,7 +53,14 @@ public class Payment {
 
     private LocalDateTime updatedAt;
 
-    private Payment(Long orderId, String userId, Money amount, String paymentMethod) {
+    private Payment(
+        Long orderId,
+        String userId,
+        Money amount,
+        String paymentMethod
+    ) {
+        validatePaymentCreation(orderId, userId, amount, paymentMethod);
+
         this.orderId = orderId;
         this.userId = userId;
         this.amount = amount;
@@ -60,15 +70,26 @@ public class Payment {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public static Payment createForCard(Long orderId, String userId, Money amount,
-        String cardType, String cardNo) {
+    public static Payment createForCard(
+        Long orderId,
+        String userId,
+        Money amount,
+        String cardType,
+        String cardNo
+    ) {
+        validateCardPayment(cardType, cardNo);
+
         Payment payment = new Payment(orderId, userId, amount, "CARD");
         payment.cardType = cardType;
         payment.cardNo = cardNo;
         return payment;
     }
 
-    public static Payment createForPoint(Long orderId, String userId, Money amount) {
+    public static Payment createForPoint(
+        Long orderId,
+        String userId,
+        Money amount
+    ) {
         return new Payment(orderId, userId, amount, "POINT");
     }
 
@@ -124,5 +145,52 @@ public class Payment {
 
     public boolean isPointPayment() {
         return "POINT".equals(this.paymentMethod);
+    }
+
+    private static void validatePaymentCreation(
+        Long orderId,
+        String userId,
+        Money amount,
+        String paymentMethod
+    ) {
+        if (orderId == null) {
+            throw new CoreException(
+                ErrorType.BAD_REQUEST,
+                "주문 ID는 필수입니다."
+            );
+        }
+        if (userId == null || userId.trim().isEmpty()) {
+            throw new CoreException(
+                ErrorType.BAD_REQUEST,
+                "사용자 ID는 필수입니다."
+            );
+        }
+        if (amount == null) {
+            throw new CoreException(
+                ErrorType.BAD_REQUEST,
+                "결제 금액은 필수입니다."
+            );
+        }
+        if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
+            throw new CoreException(
+                ErrorType.BAD_REQUEST,
+                "결제 수단은 필수입니다."
+            );
+        }
+    }
+
+    private static void validateCardPayment(String cardType, String cardNo) {
+        if (cardType == null || cardType.trim().isEmpty()) {
+            throw new CoreException(
+                ErrorType.BAD_REQUEST,
+                "카드 타입은 필수입니다."
+            );
+        }
+        if (cardNo == null || cardNo.trim().isEmpty()) {
+            throw new CoreException(
+                ErrorType.BAD_REQUEST,
+                "카드 번호는 필수입니다."
+            );
+        }
     }
 }

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class PaymentRepositoryImpl implements PaymentRepository {
 
-    private PaymentJpaRepository paymentJpaRepository;
+    private final PaymentJpaRepository paymentJpaRepository;
 
     @Override
     public Payment save(Payment payment) {

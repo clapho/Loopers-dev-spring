@@ -4,8 +4,6 @@ import com.loopers.domain.coupon.Coupon;
 import com.loopers.domain.coupon.CouponService;
 import com.loopers.domain.order.Order;
 import com.loopers.domain.order.OrderService;
-import com.loopers.domain.order.external.ExternalOrderService;
-import com.loopers.domain.point.PointService;
 import com.loopers.domain.product.Product;
 import com.loopers.domain.product.ProductService;
 import com.loopers.domain.user.UserService;
@@ -23,8 +21,6 @@ public class OrderFacade {
     private final OrderService orderService;
     private final ProductService productService;
     private final UserService userService;
-    private final PointService pointService;
-    private final ExternalOrderService externalOrderService;
     private final CouponService couponService;
 
     @Transactional
@@ -50,20 +46,13 @@ public class OrderFacade {
             order.applyCoupon(coupon);
         }
 
-        pointService.use(command.userId(), order.getFinalPrice().getValue().longValue());
-
+        order.startPayment();
         Order savedOrder = orderService.place(order);
 
-        try {
-            externalOrderService.sendOrderToExternalSystem(savedOrder);
-        } catch (Exception e) {
-            log.error("외부 시스템 전송 실패, 주문 ID: {}", savedOrder.getId(), e);
-        }
+        log.info("주문 생성 완료. orderId: {}, userId: {}, finalPrice: {}",
+            savedOrder.getId(), command.userId(), savedOrder.getFinalPrice());
 
-        savedOrder.complete();
-        Order completedOrder = orderService.place(savedOrder);
-
-        return OrderInfo.Detail.from(completedOrder);
+        return OrderInfo.Detail.from(savedOrder);
     }
 
     @Transactional(readOnly = true)
@@ -71,7 +60,6 @@ public class OrderFacade {
         validateUserExists(command.userId());
 
         Order order = orderService.get(command.orderId(), command.userId());
-
         return OrderInfo.Detail.from(order);
     }
 
