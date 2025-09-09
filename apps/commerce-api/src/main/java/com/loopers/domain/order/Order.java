@@ -101,6 +101,56 @@ public class Order {
         this.status = OrderStatus.COMPLETED;
     }
 
+    public void startPayment() {
+        if (this.status != OrderStatus.PENDING) {
+            throw new CoreException(
+                ErrorType.BAD_REQUEST,
+                "주문 대기 상태에서만 결제를 시작할 수 있습니다."
+            );
+        }
+        this.status = OrderStatus.PAYMENT_PENDING;
+    }
+
+    public void processPayment() {
+        if (this.status != OrderStatus.PAYMENT_PENDING) {
+            throw new CoreException(
+                ErrorType.BAD_REQUEST,
+                "결제 대기 상태에서만 결제 처리를 시작할 수 있습니다."
+            );
+        }
+        this.status = OrderStatus.PAYMENT_PROCESSING;
+    }
+
+    public void completePayment() {
+        if (this.status != OrderStatus.PAYMENT_PROCESSING) {
+            throw new CoreException(
+                ErrorType.BAD_REQUEST,
+                "결제 처리중 상태에서만 결제를 완료할 수 있습니다."
+            );
+        }
+        this.status = OrderStatus.COMPLETED;
+    }
+
+    public void failPayment() {
+        if (this.status != OrderStatus.PAYMENT_PROCESSING) {
+            throw new CoreException(
+                ErrorType.BAD_REQUEST,
+                "결제 처리중 상태에서만 결제 실패 처리할 수 있습니다."
+            );
+        }
+        this.status = OrderStatus.PAYMENT_FAILED;
+    }
+
+    public void cancel() {
+        if (!this.status.canCancel()) {
+            throw new CoreException(
+                ErrorType.BAD_REQUEST,
+                "취소할 수 없는 주문 상태입니다."
+            );
+        }
+        this.status = OrderStatus.CANCELLED;
+    }
+
     private void calculateTotalPrice() {
         long total = items.stream()
             .mapToLong(item -> item.getTotalPrice().getValue().longValue())
